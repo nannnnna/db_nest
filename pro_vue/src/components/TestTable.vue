@@ -20,11 +20,21 @@
       <el-table-column prop="description" label="Description" sortable></el-table-column>
       <el-table-column type="expand">
         <template v-slot="props">
+          <el-input placeholder="Title" v-model="props.row.editingTitle" @keydown.stop
+                    @keyup.stop></el-input>
+          <el-input placeholder="Price" v-model="props.row.editingPrice" @keydown.stop
+                    @keyup.stop></el-input>
+          <el-input placeholder="Author" v-model="props.row.editingAuthor" @keydown.stop
+                    @keyup.stop></el-input>
+          <el-input placeholder="Link" v-model="props.row.editingLink" @keydown.stop
+                    @keyup.stop></el-input>
           <el-input
               type="textarea"
               :rows="2"
               placeholder="Введите описание"
-              v-model="props.row.editingDescription" >
+              v-model="props.row.editingDescription"
+              @keydown.stop
+              @keyup.stop>
           </el-input>
           <el-button
               type="primary"
@@ -72,6 +82,10 @@ export default {
           .then(response => {
             this.testData = response.data.map(book => ({
               ...book,
+              editingTitle: book.title,
+              editingPrice: book.price,
+              editingAuthor: book.author,
+              editingLink: book.link,
               editingDescription: book.description,
             }));
             this.load = true;
@@ -83,10 +97,10 @@ export default {
     saveDescription(row) {
       const updatedBook = {
         id: row.id,
-        title: row.title,
-        price: row.price,
-        author: row.author,
-        link: row.link,
+        title: row.editingTitle,
+        price: row.editingPrice,
+        author: row.editingAuthor,
+        link: row.editingLink,
         description: row.editingDescription
       };
       axios.patch(`http://localhost:3027/books/${row.id}`, updatedBook)
@@ -94,14 +108,16 @@ export default {
             const index = this.testData.findIndex(book => book.id === row.id);
             if (index !== -1) {
               // Обновляем книгу в массиве
-              this.testData.splice(index, 1, {
+              this.testData[index] = {
                 ...this.testData[index],
                 ...updatedBook
-              });
+              };
+              // Важно: чтобы изменения были реактивными, можно использовать следующий трюк:
+              this.testData = [...this.testData];
             }
             this.$message({
               type: 'success',
-              message: 'Описание успешно сохранено!'
+              message: 'Success!'
             });
           })
           .catch(error => {
