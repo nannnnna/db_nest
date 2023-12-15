@@ -59,17 +59,6 @@ export default {
             console.error(error);
           });
     },
-    updateDescription(row) {
-      axios.patch(`http://localhost:3027/books/${row.id}`, {
-        description: row.description
-      })
-          .then(() => {
-            // Handle the success case
-          })
-          .catch(error => {
-            console.error(error);
-          });
-    }, // <-- This comma was missing
     saveDescription(row) {
       const updatedBook = {
         id: row.id,
@@ -81,6 +70,14 @@ export default {
       };
       axios.patch(`http://localhost:3027/books/${row.id}`, updatedBook)
           .then(() => {
+            const index = this.testData.findIndex(book => book.id === row.id);
+            if (index !== -1) {
+              // Обновляем книгу в массиве
+              this.testData.splice(index, 1, {
+                ...this.testData[index],
+                ...updatedBook
+              });
+            }
             this.$message({
               type: 'success',
               message: 'Описание успешно сохранено!'
