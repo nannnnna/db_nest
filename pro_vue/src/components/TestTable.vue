@@ -1,6 +1,11 @@
 <template>
   <div v-if="load">
-    <el-table :data="testData" style="width: 100%">
+    <el-input
+        v-model="searchQuery"
+        placeholder="Search..."
+        style="margin-bottom: 10px;">
+    </el-input>
+    <el-table :data="filteredData" style="width: 100%">
       <el-table-column type="expand">
         <template v-slot="props">
           <p>ID: {{ props.row.id }}</p>
@@ -40,7 +45,23 @@ export default {
     return {
       testData: [],
       load: false,
+      searchQuery: '',
     };
+  },
+  computed: {
+    filteredData() {
+      if (!this.searchQuery) {
+        return this.testData;
+      }
+      // Фильтрация данных на основе строки поиска
+      return this.testData.filter(item => {
+        const searchString = this.searchQuery.toLowerCase();
+        return Object.values(item)
+            .join(' ')
+            .toLowerCase()
+            .includes(searchString);
+      });
+    },
   },
   created() {
     this.fetchData();
